@@ -1,6 +1,6 @@
-# Time & Space Complexity — Interview Quick Reference
+# Time & Space Complexity 
 
-> **How to use this file:** Read it once carefully to build intuition. Re-read it the night before an interview. Everything you need — definitions, code examples, proofs, tables, and tricks — is here in one place.
+
 
 ---
 
@@ -1130,4 +1130,4 @@ O(1) < O(log N) < O(sqrt(N)) < O(N) < O(N log N) < O(N^2) < O(N^3) < O(2^N) < O(
 
 ---
 
-*Happy coding, and good luck with your interviews!*
+
