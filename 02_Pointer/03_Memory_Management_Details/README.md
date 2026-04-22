@@ -1,6 +1,5 @@
 # Memory Management Details
 
-> **How to use this file:** This guide explains memory management like a story, completely removing the fear of memory allocation. It covers the `static` keyword, memory layouts in C/C++, and dynamic memory allocation (`malloc`, `calloc`, `realloc`, `free`) with step-by-step visual ASCII diagrams in easy English.
 
 ---
 
