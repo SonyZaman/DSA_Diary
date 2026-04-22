@@ -198,7 +198,7 @@ int calculate(int a, int b, int (*op)(int, int)) {
     return op(a, b);
 }
 ```
-Now `calculate` doesn't care if it's adding or multiplying; it just calls whatever it's given!
+Now `calculate` has no idea whether it is adding, subtracting, or multiplying — it just knows: "I will be given a function, and I will call it." Which function? You will decide!
 
 ```c
 int main() {
@@ -210,13 +210,17 @@ int main() {
 ```
 
 **Step-by-step for `calculate(10, 5, add)`**:
-1.  **Step 1**: `calculate` is called with `a=10, b=5, op=add`. `op` points to the `add` function.
-2.  **Step 2**: `return op(a, b);` calls `add(10, 5)`.
+1.  **Step 1**: `calculate` is called with `a=10, b=5, op=add`. The `op` pointer now points to the `add` function.
+2.  **Step 2**: `return op(a, b);` is executed. Since `op` points to `add`, it's essentially calling `add(10, 5)`.
 3.  **Step 3**: `add(10, 5)` returns `15`.
-4.  **Result**: `15` is returned to main.
+4.  **Result**: `15` is returned to `main`.
 
-**Callback Power:**
-You can add new features without changing the `calculate` function at all:
+### The Callback Pattern
+This pattern is called a **Callback** in programming — you are "giving" one function to another function so it can be called back later.
+
+The biggest advantage? If you want to add a new operation, you only need to write the new function; you **never** have to change the `calculate` function again!
+
+**Adding new features without changing the original code:**
 ```c
 int divide(int a, int b) { return a / b; }
 int modulo(int a, int b) { return a % b; }
@@ -224,6 +228,7 @@ int modulo(int a, int b) { return a % b; }
 printf("%d\n", calculate(10, 5, divide));  // 2
 printf("%d\n", calculate(10, 5, modulo));  // 0
 ```
+This is dynamic! `calculate` remains exactly the same while its capabilities expand!
 
 ### The C `qsort` Function
 C's built-in sorting function, `qsort`, uses this same callback pattern:
