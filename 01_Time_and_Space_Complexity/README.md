@@ -1,6 +1,6 @@
-#  Time & Space Complexity  Interview Quick Reference
+#  Time & Space Complexity  
 
-> **How to use this file:** Read it once carefully to build intuition. Re-read it the night before an interview. Everything you need  definitions, code examples, proofs, tables, and tricks  is here in one place.
+
 
 ---
 
