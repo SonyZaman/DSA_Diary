@@ -852,19 +852,19 @@ arr[1000] = 42; // ❌ too far away — random memory corruption!
 | **Stack overflow** | deep infinite recursion |
 
 ### Debugging Tips
-→ If you get a Segfault, first check — is any pointer `NULL` or uninitialized?
-→ Use `printf` to print pointer values right before the crash: `printf("p = %p\n", p);`
-→ Use the **Valgrind** tool (on Linux/Mac): `valgrind ./program` — It shows memory leaks and invalid accesses!
-→ Check if there is one `free` for every `malloc`.
-→ Draw memory diagrams for complex programs to map out where pointers are pointing.
+- **→** If you get a Segfault, first check — is any pointer `NULL` or uninitialized?
+- **→** Use `printf` to print pointer values right before the crash: `printf("p = %p\n", p);`
+- **→** Use the **Valgrind** tool (on Linux/Mac): `valgrind ./program` — It shows memory leaks and invalid accesses!
+- **→** Check if there is one `free` for every `malloc`.
+- **→** Draw memory diagrams for complex programs to map out where pointers are pointing.
 
 ## 8. Best Practices Checklist — Remember these!
-→ **Initialize thoroughly:** Initialize the pointer immediately when declaring (with `NULL` or valid address).
-→ **Verify Heap:** Always check for `NULL` after `malloc`/`calloc`.
-→ **Safe Disposals:** Set `pointer = NULL` after executing `free()`.
-→ **Validation checks:** Check for `NULL` before dereferencing if uncertain.
-→ **Resizing safeties:** Use a `temp` pointer in `realloc`.
-→ **Boundary control:** Do not perform pointer arithmetic outside array bounds.
-→ **Return scopes:** Do not return a local variable's pointer (use `static` or `malloc`).
-→ **Reverse removals:** 2D array: free the inner structures first, then the outer array.
-→ **String edit safeties:** If you want to modify a String literal, use `char[]` instead of `char*`.
+- **→ Initialize thoroughly:** Initialize the pointer immediately when declaring (with `NULL` or valid address).
+- **→ Verify Heap:** Always check for `NULL` after `malloc`/`calloc`.
+- **→ Safe Disposals:** Set `pointer = NULL` after executing `free()`.
+- **→ Validation checks:** Check for `NULL` before dereferencing if uncertain.
+- **→ Resizing safeties:** Use a `temp` pointer in `realloc`.
+- **→ Boundary control:** Do not perform pointer arithmetic outside array bounds.
+- **→ Return scopes:** Do not return a local variable's pointer (use `static` or `malloc`).
+- **→ Reverse removals:** 2D array: free the inner structures first, then the outer array.
+- **→ String edit safeties:** If you want to modify a String literal, use `char[]` instead of `char*`.
