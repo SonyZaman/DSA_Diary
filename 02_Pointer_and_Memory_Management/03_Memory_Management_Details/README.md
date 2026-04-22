@@ -321,8 +321,6 @@ int main() {
 
 `malloc` might leave behind old garbage values from other programs. `calloc` cleans the house before handing you the keys.
 
-**Syntax (Takes 2 arguments instead of 1):**
-```c
 // malloc — one argument: total bytes
 int *a = (int *)malloc(5 * sizeof(int));
 
@@ -336,18 +334,47 @@ int *b = (int *)calloc(5, sizeof(int));
     ┌────────┬────────┬────────┬────────┬────────┐
     │ -45612 │   0    │ 789456 │  -12   │ 98745  │  ← Garbage!
     └────────┴────────┴────────┴────────┴────────┘
-    Nobody knows what's inside!
+    Nobody knows what is inside! It is "garbage" from previous programs.
 
     calloc(5, sizeof(int)):
     ┌────────┬────────┬────────┬────────┬────────┐
     │   0    │   0    │   0    │   0    │   0    │  ← Clean!
     └────────┴────────┴────────┴────────┴────────┘
-    Sparkling clean zeros!
+    Everything is filled with sparkling clean 0s!
 ```
 
-**When to use which?**
-- Use **`calloc`** when you need everything to start at 0 (e.g., counting frequencies, tracking scores).
-- Use **`malloc`** when you are immediately going to overwrite the array with your own data (e.g., taking user input). Filling it with zeros first is a waste of CPU time.
+**Side-by-Side Code Comparison:**
+```c
+// malloc output
+int *a = (int *)malloc(5 * sizeof(int));
+printf("malloc: ");
+for (int i = 0; i < 5; i++) printf("%d ", a[i]);
+// Output: malloc: -456123 0 789456 -12 98745  (random garbage!)
+
+// calloc output
+int *b = (int *)calloc(5, sizeof(int));
+printf("calloc: ");
+for (int i = 0; i < 5; i++) printf("%d ", b[i]);
+// Output: calloc: 0 0 0 0 0  (guaranteed clean!)
+```
+
+**When to use malloc vs calloc?**
+
+- **Use calloc** when you want everything to start from zero.
+- **Use malloc** when you are going to overwrite the values immediately (like taking input).
+
+```c
+// ✅ calloc is better here — we want to start counting from 0
+int *frequency = (int *)calloc(26, sizeof(int));  // Frequency array for a-z
+
+// ✅ malloc is better here — no need to waste time filling with 0s
+int *arr = (int *)malloc(n * sizeof(int));
+for (int i = 0; i < n; i++) {
+    scanf("%d", &arr[i]);  // All values are provided by the user immediately
+}
+```
+
+> 💡 **Pro Tip:** Just like `malloc`, `calloc` can also fail if the system is out of memory. **Always perform a NULL check** before using the pointer!
 
 ---
 
