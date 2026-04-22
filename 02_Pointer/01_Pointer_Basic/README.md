@@ -1,5 +1,21 @@
 # Pointers
 
+## Table of Contents
+
+1. [What is a Pointer?](#1-what-is-a-pointer)
+2. [Declaring and Initializing Pointers](#2-declaring-and-initializing-pointers)
+3. [Address-of (`&`) and Dereference (`*`) Operators](#3-address-of--and-dereference--operators)
+4. [Pointer Arithmetic](#4-pointer-arithmetic)
+5. [Pointer to a Pointer (Double Pointer)](#5-pointer-to-a-pointer-double-pointer)
+6. [Pointers and Arrays](#6-pointers-and-arrays)
+7. [Function Argument Passing Methods in C++](#7-function-argument-passing-methods-in-c)
+    - [7.1. Pass-by-Value](#71-pass-by-value)
+    - [7.2. Pass-by-Pointer](#72-pass-by-pointer)
+    - [7.3. Pass-by-Reference](#73-pass-by-reference)
+8. [Arrow Operator](#8-arrow-operator)
+
+---
+
 ## 1. What is a Pointer?
 A pointer is a special type of variable that stores the memory address of another variable. Instead of holding a value directly, it "points to" the location in memory where the value is stored. This allows for more powerful and flexible programming, particularly for tasks involving dynamic memory management and efficient data manipulation.
 
