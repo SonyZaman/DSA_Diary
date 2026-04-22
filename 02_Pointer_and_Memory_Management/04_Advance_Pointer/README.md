@@ -298,6 +298,20 @@ char str1[] = "Hello";
 // Method 2: char pointer — Points to a Read-Only memory section!
 char *str2 = "Hello";
 ```
+**Memory Diagram:**
+```text
+    char str1[] = "Hello":
+    "Hello" is copied onto the Stack:
+    ┌─────┬─────┬─────┬─────┬─────┬─────┐
+    │ 'H' │ 'e' │ 'l' │ 'l' │ 'o' │ '\0'│  ← Stack Block (Modifiable!)
+    └─────┴─────┴─────┴─────┴─────┴─────┘
+
+    char *str2 = "Hello":
+    str2 pointer → Points directly to Read-Only Memory:
+    str2 ──→ ┌─────┬─────┬─────┬─────┬─────┬─────┐
+             │ 'H' │ 'e' │ 'l' │ 'l' │ 'o' │ '\0'│  ← Read-Only! (Code section)
+             └─────┴─────┴─────┴─────┴─────┴─────┘
+```
 
 Because `str1` is on your stack, you can change it!
 ```c
@@ -307,7 +321,17 @@ Because `str2` points to the Read-Only code section, trying to change it crashes
 ```c
 str2[0] = 'J';   // ❌ CRASH! Segmentation Fault!
 ```
-> **Rule:** Never use `char *str = "Text"` if you plan on modifying the letters inside the string later!
+> **Rule:** Never use `char *str = "Text"` if you plan on modifying the letters inside the string later! Use `char str[] = "Text"` instead.
+
+### `sizeof` Differences
+Because one is an array and one is a pointer, `sizeof` evaluates them completely differently:
+```c
+char str1[] = "Hello";
+char *str2 = "Hello";
+
+printf("sizeof(str1) = %lu\n", sizeof(str1));  // 6 — The size of the full array (5+1)
+printf("sizeof(str2) = %lu\n", sizeof(str2));  // 8 — The size of an 8-byte pointer (on 64-bit systems)
+```
 
 ---
 
