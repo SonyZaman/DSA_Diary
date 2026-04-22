@@ -390,6 +390,15 @@ void *realloc(void *ptr, size_t new_size);
 //             Old pointer     New TOTAL size in bytes
 ```
 
+**Step-by-step Usage:**
+```c
+int *arr = (int *)malloc(5 * sizeof(int));
+arr[0] = 10; arr[1] = 20; arr[2] = 30; arr[3] = 40; arr[4] = 50;
+
+// Need more space! Change from 5 to 10
+arr = (int *)realloc(arr, 10 * sizeof(int));
+```
+
 **What `realloc` does behind the scenes:**
 
 ```text
@@ -415,23 +424,45 @@ void *realloc(void *ptr, size_t new_size);
     │ 10 │ 20 │ 30 │ 40 │ 50 │ ?? │ ?? │ ?? │ ?? │ ?? │
     └────┴────┴────┴────┴────┴────┴────┴────┴────┴────┘
     Brand New Address!  Data copied over safely!
+
+    ❌ Case 3 — Fail:
+    Returns NULL, but the old memory block is untouched.
+```
+
+**You can also shrink it:**
+```c
+// Shrink from 10 down to 3
+arr = (int *)realloc(arr, 3 * sizeof(int));
+// Now only arr[0]=10, arr[1]=20, arr[2]=30 exist — others are removed.
 ```
 
 > **🛑 The Biggest Danger of `realloc`:**
 > If it fails, it returns `NULL`. If you directly overwrite your old pointer like this:
-> `arr = (int *)realloc(arr, 1000); // ❌ WRONG!`
+> `arr = (int *)realloc(arr, 1000); // ❌ DANGEROUS!`
 > 
-> If it fails, `arr` becomes `NULL`. You **lose** access to your old data, AND you can't even free it anymore! This is a severe memory leak.
+> If it fails, `arr` becomes `NULL`. You **lose** access to your old data (the address is gone), AND you can't even free it anymore! This creates a severe memory leak.
 
-**Safe Pattern with a `temp` pointer:**
+**✅ Safe Pattern — use a `temp` pointer:**
 ```c
 int *temp = (int *)realloc(arr, 10 * sizeof(int));
 
 if (temp != NULL) {
-    arr = temp;   // Safe to upgrade!
+    // Success! safely update the pointer
+    arr = temp;
+    printf("Resize successful!\n");
 } else {
-    // Failed, but old array is still safe inside 'arr'!
+    // Failed! But old data is still safe inside 'arr'
+    printf("Resize failed, but original data is preserved.\n");
 }
+```
+
+**`realloc` Special Behaviors:**
+```c
+// Behavior 1: realloc(NULL, size) is identical to malloc(size)
+int *p = (int *)realloc(NULL, 5 * sizeof(int));
+
+// Behavior 2: realloc(ptr, 0) is usually identical to free(ptr) 
+// (Note: Implementation defined, avoid using for this purpose)
 ```
 
 ---
@@ -440,56 +471,61 @@ if (temp != NULL) {
 
 `free` is the most important part of dynamic memory — and the one beginners forget the most!
 
-Since the Heap doesn't clean itself automatically like the Stack does, renting memory without giving it back creates a **Memory Leak**.
+**Why must we free?**
+Local Stack variables are cleaned up automatically. But the **Heap** stays occupied unless you explicitly give it back. If you keep "renting" without returning, you get a **Memory Leak**.
 
+**Visualizing a Memory Leak:**
 ```c
 void leakyFunction() {
-    int *p = (int *)malloc(1000 * sizeof(int));  // Rented 4000 bytes
-    // ... do some work ...
-    return;    // ❌ Function ended but memory was NEVER freed!
+    int *p = (int *)malloc(1000 * sizeof(int));  // Rent 4000 bytes
+    // ... work ...
+    return;    // ❌ Function ends but memory was NEVER returned!
 }
 
 int main() {
     for (int i = 0; i < 1000; i++) {
-        leakyFunction();   // Leaks 4000 bytes every loop!
+        leakyFunction();   // Loses another 4KB every single loop!
     }
-    // 1000 loops × 4000 bytes = ~4 MB of wasted RAM!
+    // Result: ~4MB of RAM is wasted/stolen from the OS.
     return 0;
 }
 ```
-
 ```text
-    Heap slowly filling up:
+    Heap filling up:
     ┌──────┬──────┬──────┬──────┬──────┬───────┐
     │ leak │ leak │ leak │ leak │ leak │  ...  │
     └──────┴──────┴──────┴──────┴──────┴───────┘
-    No one is using this space, but your OS thinks it's reserved!
+    The OS thinks this space is "occupied", even though no one is using it.
 ```
-In server applications or games, memory leaks slowly choke up the system until it crashes!
 
-**How to free and prevent bugs:**
+**How to free safely:**
 ```c
-free(arr);     // Returns the memory to the OS
+free(arr);     // Returns memory to the Heap
+arr = NULL;    // CRITICAL: Avoid dangling pointer
 ```
 
-**⚠️ Wait, there's a catch!** After calling `free(arr)`, the memory goes back to the OS, but the variable `arr` **still holds the old address!** If you accidentally try to use `*arr` again, it causes undefined behavior.
+**⚠️ The "Zombie" Address Problem:**
+After calling `free(arr)`, the memory is gone, but the variable `arr` **still holds the old address!** This is a Dangling Pointer.
 
 ```text
     Before free(arr):           After free(arr):
-    arr = 0xH1000               arr = 0xH1000 (address still exists!)
+    arr = 0xH1000               arr = 0xH1000 (Address STILL inside arr!)
          ↓                           ↓
     ┌────────┐                  ┌────────┐
-    │   42   │  (valid)         │  ????  │  (Freed! Invalid space!)
+    │   42   │  (valid)         │  ????  │  (Freed! Garbage/Invalid!)
     └────────┘                  └────────┘
-```
-**Best Practice:** The moment you `free`, immediately set the pointer to `NULL`.
-```c
-free(arr);
-arr = NULL;
-```
-Now, if you accidentally use `arr`, it will cleanly crash your program right away (easy to fix) instead of silently corrupting random data.
 
----
+    After arr = NULL:
+    arr = NULL
+    (Pointing nowhere — safe!)
+```
+Setting `arr = NULL` ensures that if you accidentally use it later, the program crashes immediately (fast fail) instead of performing silent, random memory corruption.
+
+**Rules of `free()`:**
+- **✅ Only free heap memory:** Only free pointers that came from `malloc`, `calloc`, or `realloc`.
+- **❌ Never free Stack variables:** `int x; free(&x);` will CRASH your program.
+- **❌ Never Double Free:** Calling `free(p)` twice on the same address will CRASH or corrupt your memory.
+- **✅ free(NULL) is safe:** It simply does nothing. This is why setting `p = NULL` after free is great — a second free won't cause a crash!
 
 ## 9. Solving Dangling Pointer with `malloc` (Part 2)
 
