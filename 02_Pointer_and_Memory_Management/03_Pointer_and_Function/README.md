@@ -293,7 +293,7 @@ int *p = badFunction();
 printf("%d", *p);   // ❌ Undefined Behavior! Random crash or garbage data.
 ```
 
-If you need a pointer to survive after the function ends, you must use **`static`** or **Dynamic Memory (malloc)**, which we learn in Part 3.
+If you need a pointer to survive after the function ends, you must use **`static`** or **Dynamic Memory (malloc)**.
 
 > ⚠️ **Warning:** Never return a pointer to a local variable. Local variables are destroyed when the function returns. The resulting pointer is a "Dangling Pointer" pointing at invalid memory.
 
