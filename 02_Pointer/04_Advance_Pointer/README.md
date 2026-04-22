@@ -1,6 +1,6 @@
 # Advanced Pointers in C/C++
 
-> **How to use this file:** This guide covers the truly advanced aspects of pointers: Double Pointers, Memory allocation inside functions, Strings vs `char*`, Structs, Linked Lists, and the most notorious Pointer bugs (Memory Leaks, Dangling Pointers, Segfaults) with easy English explanations and ASCII visual diagrams!
+> This guide covers the truly advanced aspects of pointers: Double Pointers, Memory allocation inside functions, Strings vs `char*`, Structs, Linked Lists, and the most notorious Pointer bugs (Memory Leaks, Dangling Pointers, Segfaults) with easy English explanations and ASCII visual diagrams!
 
 ---
 
