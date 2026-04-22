@@ -85,11 +85,36 @@ int main() {
 }
 ```
 
-**Step-by-Step Logic:**
-1.  **`int x = 42;`**: A box `x` is created with value 42 at address `0x7FF3A`.
-2.  **`changeValue(&x);`**: Address `0x7FF3A` is sent. In the function, `ptr = 0x7FF3A`.
-3.  **`*ptr = 100;`**: Function goes to address `0x7FF3A` and writes `100` directly.
-4.  **Result**: Original `x` is now `100`.
+**Line-by-Line Logic:**
+
+- **Step 1: `int x = 42;`**  
+  A box named `x` is created in memory, and the value `42` is stored inside.
+  ```text
+        ┌──────┐
+        │  42  │   x (address: 0x7FF3A)
+        └──────┘
+  ```
+
+- **Step 2: `changeValue(&x);`**  
+  We send the address of `x` (`0x7FF3A`) to the function. Inside the function, the pointer `ptr` now holds this address.
+  ```text
+        ptr = 0x7FF3A  ->  "I know exactly where 'x' is!"
+  ```
+
+- **Step 3: `*ptr = 100;`**  
+  The function goes to the address pointed to by `ptr` (`0x7FF3A`) and writes `100` there.  
+  This directly changes the original value of `x`.
+  ```text
+        ┌──────┐
+        │ 100  │   x (address: 0x7FF3A) ← CHANGED!
+        └──────┘
+  ```
+
+- **Step 4: `printf("x = %d\n", x);`**  
+  `x` now contains `100`.  
+  **Output:** `100`
+
+**Key Difference:** In Pass by Value, we sent a copy, so the original was safe. In Pass by Reference, we sent the address, so we went directly to the original "house" and changed the furniture!
 
 ---
 
