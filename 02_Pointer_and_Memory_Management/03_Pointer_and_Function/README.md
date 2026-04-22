@@ -1,8 +1,5 @@
-# C Pointers — Part 2: Pointers and Functions
+# Pointers and Functions
 
-Let’s learn like a story, without any fear! 
-
-This is **Part 2** — focusing on how Pointers interact with functions, the difference between Pass by Value and Pass by Reference, and the advanced concept of Function Pointers.
 
 ---
 
