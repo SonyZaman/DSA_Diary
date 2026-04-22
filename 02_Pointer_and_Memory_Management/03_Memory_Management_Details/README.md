@@ -270,7 +270,48 @@ if (arr == NULL) {
     return 1;   // safely exit program
 }
 // Safe to proceed!
+for (int i = 0; i < 5; i++) {
+    arr[i] = (i + 1) * 10;  // 10, 20, 30, 40, 50
+}
 ```
+
+**A Complete Example — Dynamic array with user-defined size:**
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n;
+    printf("How many numbers do you want to keep? ");
+    scanf("%d", &n);
+
+    // Allocate space for 'n' ints at runtime!
+    int *arr = (int *)malloc(n * sizeof(int));
+
+    if (arr == NULL) {
+        printf("Could not allocate memory!\n");
+        return 1;
+    }
+
+    // Take input from user
+    for (int i = 0; i < n; i++) {
+        printf("Number %d: ", i + 1);
+        scanf("%d", &arr[i]);
+    }
+
+    // Print all elements
+    printf("Your numbers: ");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+
+    free(arr);       // Work is done — return the memory!
+    arr = NULL;      // Avoid dangling pointers
+    return 0;
+}
+```
+> **Notice:** If the user enters `3` then space for 3 is taken, if they enter `100` then space for 100 is taken — it is decided dynamically at runtime! This flexibility is impossible with a standard `int arr[100]` static array block.
 
 ---
 
