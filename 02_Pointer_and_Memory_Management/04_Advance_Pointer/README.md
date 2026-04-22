@@ -479,19 +479,133 @@ int main() {
 ```
 
 **The mighty Arrow Operator (`->`)**
-Instead of the clunky `(*ptr).name`, C gives us the sexy `->` arrow!
+There are two ways to access members:
 ```c
+// Way 1: (*ptr).member — dereference first, then access with dot
+printf("Name: %s\n", (*ptr).name);     // Rafiq
+
+// Way 2: ptr->member — arrow operator! Shorthand for Way 1
 printf("Name: %s\n", ptr->name);       // Rafiq
 printf("Age: %d\n", ptr->age);         // 21
+printf("GPA: %.2f\n", ptr->gpa);       // 3.85
 ```
 
-**Passing to functions: Speed Optimization**
-If you pass a struct normally, the entire massive chunk of data is completely duplicated (~58 bytes copied). If you pass a pointer, only a microscopic 8-byte address is sent!
+*Why do we have to write `(*ptr).name` instead of `*ptr.name`?*
+```text
+    *ptr.name
+    → *(ptr.name)   ← The . operator has higher priority than * !
+    → It tries to find the 'name' member of ptr? But ptr is a pointer, it has no members! ERROR!
+
+    (*ptr).name
+    → First *ptr → Gets the actual structure
+    → Then .name → Member access ✓
+
+    ptr->name
+    → Does the exact same thing in one clean line! ✓
+```
+> **Pro Tip:** Always use the `->` operator with structure pointers. It is significantly more readable!
+
+### Passing Structure pointers to functions
+Structures can be massive. If you pass by value, the entire structure is copied — very slow! Passing by pointer only sends an address — extremely fast!
+
 ```c
-// ✅ Pass by pointer is EXTREMELY fast and allows modifying original data!
-void birthday(struct Student *s) {
-    s->age++;   // Modifies the original student!
+// ❌ Pass by value — the entire structure is copied!
+void printStudent(struct Student s) {
+    printf("%s, %d, %.2f\n", s.name, s.age, s.gpa);
 }
+
+// ✅ Pass by pointer — only the address is sent! Fast!
+void printStudentPtr(const struct Student *s) {
+    printf("%s, %d, %.2f\n", s->name, s->age, s->gpa);
+}
+
+// ✅ It also allows modification of the original!
+void birthday(struct Student *s) {
+    s->age++;   // original structure's age increases!
+}
+
+int main() {
+    struct Student s1 = {"Rafiq", 21, 3.85};
+    
+    printStudentPtr(&s1);   // Rafiq, 21, 3.85
+    birthday(&s1);          // age++ → 22
+    printStudentPtr(&s1);   // Rafiq, 22, 3.85
+    
+    return 0;
+}
+```
+**Memory Comparison:**
+```text
+    pass by value:                pass by pointer:
+    ┌────────────────┐           ┌──────────┐
+    │ name = "Rafiq" │ copy!     │ 0x7FF00  │ just address!
+    │ age = 21       │           └──────────┘
+    │ gpa = 3.85     │           Only 8 bytes!
+    └────────────────┘
+    ~58+ bytes copied!
+```
+
+### Dynamic Structure — making Structures with `malloc`
+```c
+// Stack structure:
+struct Student s1 = {"Rafiq", 21, 3.85};    // deleted when function ends
+
+// Heap structure using malloc:
+struct Student *s2 = (struct Student *)malloc(sizeof(struct Student));
+
+if (s2 != NULL) {
+    // Note: You must use strcpy (you cannot assign arrays directly in C)
+    strcpy(s2->name, "Karim");
+    s2->age = 22;
+    s2->gpa = 3.92;
+    
+    printf("%s, %d, %.2f\n", s2->name, s2->age, s2->gpa);
+    // Karim, 22, 3.92
+    
+    free(s2);
+    s2 = NULL;
+}
+```
+
+### Dynamic Array of Structures
+```c
+int n = 3;
+struct Student *students = (struct Student *)malloc(n * sizeof(struct Student));
+
+if (students != NULL) {
+    // Get input
+    for (int i = 0; i < n; i++) {
+        printf("Name: ");
+        scanf("%s", students[i].name);    // students[i] refers to the ith structure
+        printf("Age: ");
+        scanf("%d", &students[i].age);
+        printf("GPA: ");
+        scanf("%f", &students[i].gpa);
+    }
+    
+    // Print out
+    for (int i = 0; i < n; i++) {
+        printf("%s - Age %d - GPA %.2f\n",
+               students[i].name,
+               students[i].age,
+               students[i].gpa);
+    }
+    
+    free(students);
+    students = NULL;
+}
+```
+**Continuous Memory Stack Layout:**
+```text
+    students
+     ↓
+    ┌───────────────┬───────────────┬───────────────┐
+    │ students[0]   │ students[1]   │ students[2]   │
+    │ name: "Rafiq" │ name: "Karim" │ name: "Sumon" │
+    │ age: 21       │ age: 22       │ age: 20       │
+    │ gpa: 3.85     │ gpa: 3.92     │ gpa: 3.70     │
+    └───────────────┴───────────────┴───────────────┘
+    Continuous block inside the Heap!
 ```
 
 ---
