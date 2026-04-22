@@ -1,6 +1,6 @@
-# Pointers — Complete Interview Reference
+# Pointers 
 
-> **How to use this file:** Read once to build intuition. Re-read the night before an interview. Everything — concepts, code, memory diagrams, and common mistakes — is here in one place.
+
 
 ---
 
@@ -1372,4 +1372,4 @@ arr[1000] = 42;    // random memory corruption!
 
 ---
 
-*Happy coding, and good luck with your interviews!*
+
