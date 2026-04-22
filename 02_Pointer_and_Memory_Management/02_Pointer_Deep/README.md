@@ -15,14 +15,7 @@
 7. [Pointer to a Pointer (Double Pointer)](#7-pointer-to-a-pointer-double-pointer)
 8. [Function Argument Passing — Value, Pointer, Reference](#8-function-argument-passing--value-pointer-reference)
 9. [Arrow Operator (->)](#9-arrow-operator)
-10. [Function Pointers](#10-function-pointers)
-11. [Static Keyword and Memory Sections](#11-static-keyword-and-memory-sections)
-12. [Dynamic Memory Allocation](#12-dynamic-memory-allocation)
-13. [Pointers and Strings](#13-pointers-and-strings)
-14. [Pointers and Structures](#14-pointers-and-structures)
-15. [Self-Referential Structure — Linked List Intro](#15-self-referential-structure--linked-list-intro)
-16. [Common Mistakes and Debugging Tips](#16-common-mistakes-and-debugging-tips)
-17. [Best Practices Checklist](#17-best-practices-checklist)
+
 
 ---
 
