@@ -499,33 +499,56 @@ int main() {
 ```
 
 **How to free safely:**
+The moment you call `free(arr)`, the memory returns to the Heap, but the address **still stays inside the variable `arr`**. This is dangerous!
+
 ```c
-free(arr);     // Returns memory to the Heap
-arr = NULL;    // CRITICAL: Avoid dangling pointer
+int *arr = (int *)malloc(5 * sizeof(int));
+arr[0] = 42;
+
+free(arr);          // memory is returned
+
+printf("%d", arr[0]); // ❌ UNDEFINED BEHAVIOR! 
+                      // It might print 42, it might print garbage, or it might CRASH.
+                      // You are accessing memory you no longer own!
 ```
 
 **⚠️ The "Zombie" Address Problem:**
-After calling `free(arr)`, the memory is gone, but the variable `arr` **still holds the old address!** This is a Dangling Pointer.
+After calling `free(arr)`, the variable `arr` becomes a **Dangling Pointer**.
 
 ```text
     Before free(arr):           After free(arr):
-    arr = 0xH1000               arr = 0xH1000 (Address STILL inside arr!)
+    arr = 0xH1000               arr = 0xH1000 (Address STILL exists inside arr!)
          ↓                           ↓
     ┌────────┐                  ┌────────┐
-    │   42   │  (valid)         │  ????  │  (Freed! Garbage/Invalid!)
+    │   42   │  (valid)         │  ????  │  (Freed! Invalid/Garbage space!)
     └────────┘                  └────────┘
 
     After arr = NULL:
     arr = NULL
-    (Pointing nowhere — safe!)
+    (Safe — no longer points to a "zombie" location!)
 ```
 Setting `arr = NULL` ensures that if you accidentally use it later, the program crashes immediately (fast fail) instead of performing silent, random memory corruption.
 
 **Rules of `free()`:**
-- **✅ Only free heap memory:** Only free pointers that came from `malloc`, `calloc`, or `realloc`.
-- **❌ Never free Stack variables:** `int x; free(&x);` will CRASH your program.
-- **❌ Never Double Free:** Calling `free(p)` twice on the same address will CRASH or corrupt your memory.
-- **✅ free(NULL) is safe:** It simply does nothing. This is why setting `p = NULL` after free is great — a second free won't cause a crash!
+
+```c
+// ✅ Rule 1: Only free what malloc/calloc/realloc gave you
+int *p = (int *)malloc(sizeof(int));
+free(p); // Good
+
+// ❌ Rule 2: NEVER free Stack variables!
+int x = 42;
+free(&x);     // 🛑 CRASH! OS does not allow freeing the Stack!
+
+// ❌ Rule 3: NEVER Double Free!
+int *ptr = (int *)malloc(sizeof(int));
+free(ptr);
+free(ptr);    // 🛑 CRASH! undefined behavior / memory corruption!
+
+// ✅ Tip: free(NULL) is always safe
+free(NULL);   // Does nothing, no crash.
+```
+> **Pro Tip:** If you always set `ptr = NULL` after `free(ptr)`, then a second (accidental) `free(ptr)` will be a `free(NULL)` which is safe! No crash!
 
 ## 9. Solving Dangling Pointer with `malloc` (Part 2)
 
