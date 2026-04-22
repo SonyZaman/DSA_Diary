@@ -82,8 +82,8 @@ void myFunction() {
     │ local_var│     │ global_var   │     │ heap_var │
     │   = 42   │     │   = 100      │     │  = ???   │
     └──────────┘     ├──────────────┤     └──────────┘
-    Destroyed       │ static_var   │     Stays alive until
-    after function! │   = 0        │     free() is called!
+    Destroyed        │ static_var   │     Stays alive until
+    after function!  │   = 0        │     free() is called!
                      └──────────────┘
                      Stays alive until 
                      the program ends!
@@ -452,14 +452,14 @@ int main() {
 **Visual Proof:**
 ```text
     createNumber(42) is running:
-    Stack:              Heap:
-    ┌──────┐           ┌──────┐
-    │  p   │ ────→     │  42  │   Created in Heap using malloc
-    └──────┘           └──────┘
+    Stack:               Heap:
+    ┌──────┐            ┌──────┐
+    │  p   │ ────→      │  42  │   Created in Heap using malloc
+    └──────┘            └──────┘
 
     createNumber(42) finishes:
-    Stack:              Heap:
-    p is destroyed!    ┌──────┐
+    Stack:               Heap:
+    p is destroyed!     ┌──────┐
                         │  42  │   But the memory is safe in the Heap!
                         └──────┘
 
