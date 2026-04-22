@@ -131,25 +131,65 @@ int main() {
 
 ### Use Case 2: Using malloc inside a function
 
-If you want a function to dynamically allocate memory and have the caller successfully receive that memory array, you **must** use a double pointer.
+This is the most practical use case! You want a function to allocate memory and have the caller accurately receive and utilize that memory:
 
 ```c
-// ✅ The Right Way using Double Pointers!
-void allocateRight(int **arr, int size) {
-    *arr = (int *)malloc(size * sizeof(int));  // *arr updates the caller's pointer!
+// ❌ WRONG! This will not work!
+void allocateWrong(int *arr, int size) {
+    arr = (int *)malloc(size * sizeof(int));  // We are just changing a local copy!
 }
 
 int main() {
     int *myArr = NULL;
-    allocateRight(&myArr, 5);   // Pass the address of myArr
+    allocateWrong(myArr, 5);
+    // myArr is STILL NULL! The malloc memory is lost — memory leak!
+    return 0;
+}
+```
+
+```c
+// ✅ The Right Way using Double Pointers!
+void allocateRight(int **arr, int size) {
+    *arr = (int *)malloc(size * sizeof(int));  // *arr = caller's original pointer!
+    if (*arr != NULL) {
+        for (int i = 0; i < size; i++) {
+            (*arr)[i] = 0;  // initialize the values
+        }
+    }
+}
+
+int main() {
+    int *myArr = NULL;
+    allocateRight(&myArr, 5);   // Sending the ADDRESS of myArr
     
     if (myArr != NULL) {
-        myArr[0] = 10;          // It works! The Heap memory arrived safely!
+        myArr[0] = 10;
+        myArr[1] = 20;
+        printf("%d %d\n", myArr[0], myArr[1]);  // 10 20 ✓
+        
         free(myArr);            // Don't forget to free
         myArr = NULL;
     }
     return 0;
 }
+```
+
+**Step-by-step Trace:**
+```text
+    main starts:
+    myArr = NULL
+
+    allocateRight(&myArr, 5):
+        arr = &myArr (address of myArr)
+        *arr = malloc(5 * sizeof(int))
+        Meaning: myArr = malloc(...) ← original pointer is changed!
+        malloc is successful → myArr now points into the Heap memory
+
+    Returning to main:
+    myArr → ┌────┬────┬────┬────┬────┐
+            │  0 │  0 │  0 │  0 │  0 │  Inside the Heap!
+            └────┴────┴────┴────┴────┘
+    myArr[0] = 10, myArr[1] = 20 → It works perfectly! ✓
 ```
 
 ### Use Case 3: 2D Dynamic Array (Matrix)
