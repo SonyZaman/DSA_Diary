@@ -646,13 +646,56 @@ struct Node *head = n1;  // Save the start of the chain!
     └────┴──────┘     └────┴──────┘     └────┴──────┘
 ```
 
-**Traversing a Linked List:**
+**Traversing a Linked List — print all nodes:**
 ```c
 struct Node *current = head;
 while (current != NULL) {
-    printf("%d -> ", current->data);
-    current = current->next;    // Jump to the next node!
+    printf("%d", current->data);
+    if (current->next != NULL) printf(" -> ");
+    current = current->next;    // Move to the next node
 }
+printf(" -> NULL\n");
+// Output: 10 -> 20 -> 30 -> NULL
+```
+
+**Step-by-step trace:**
+```text
+    Iteration 1: current = n1, data = 10, prints "10 -> "
+                 current = current->next = n2
+    
+    Iteration 2: current = n2, data = 20, prints "20 -> "
+                 current = current->next = n3
+    
+    Iteration 3: current = n3, data = 30, prints "30 -> NULL"
+                 current = current->next = NULL
+    
+    Iteration 4: current = NULL → loop exits!
+```
+
+### Freeing a Linked List — Avoid Memory Leaks!
+If you don't free all the nodes, the memory will leak! 
+
+```c
+// ⚠️ Carefully free memory to avoid losing the next address!
+struct Node *temp;
+current = head;
+while (current != NULL) {
+    temp = current->next;   // Save the address of the next node FIRST!
+    free(current);          // Now free the current node safely
+    current = temp;         // Jump to the saved next address
+}
+head = NULL;
+```
+
+**Why do we need the `temp` variable?**
+```text
+    ❌ Without temp:
+    free(n1) → n1 is deleted → n1->next becomes inaccessible! The rest of the list is LOST!
+
+    ✅ With temp:
+    temp = n1->next         (We saved n2 safely)
+    free(n1)                (n1 is deleted)
+    current = temp          (We jump to n2! Safe!)
 ```
 
 ---
