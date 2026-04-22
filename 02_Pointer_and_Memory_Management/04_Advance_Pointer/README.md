@@ -219,11 +219,34 @@ for (int i = 0; i < rows; i++) {
     
     Array of rows      Array of integers inside each row
 ```
-You can use it exactly like `matrix[i][j] = ...`.
+You can use it exactly like a normal 2D array:
+```c
+// Insert values
+for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+        matrix[i][j] = i * cols + j;
+    }
+}
+
+// Print values
+for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+        printf("%3d ", matrix[i][j]);
+    }
+    printf("\n");
+}
+// Output:
+//   0   1   2   3
+//   4   5   6   7
+//   8   9  10  11
+```
 
 ⚠️ **Tricky Warning: Freeing a 2D Array:**
 You must free it in **reverse order**, or you will have a catastrophic memory leak!
 ```c
+// ❌ WRONG! If you do this, you lose the addresses to the rows!
+free(matrix); // matrix is freed, but matrix[0], matrix[1], matrix[2] leak!
+
 // ✅ Correct approach! (Inner first, Outer last)
 for (int i = 0; i < rows; i++) {
     free(matrix[i]);    // Free each row's array first
@@ -231,7 +254,19 @@ for (int i = 0; i < rows; i++) {
 free(matrix);           // THEN free the pointer array itself
 matrix = NULL;
 ```
-If you free the `matrix` variable first, you completely lose the addresses of the rows, causing an irreversible memory leak!
+**Step-by-step Trace:**
+```text
+    Order of Freeing:
+    Step 1: free(matrix[0]) → row 0 is freed
+    Step 2: free(matrix[1]) → row 1 is freed
+    Step 3: free(matrix[2]) → row 2 is freed
+    Step 4: free(matrix)    → pointer array is freed!
+    Step 5: matrix = NULL   → avoid dangling pointer!
+
+    If you freed 'matrix' first:
+    matrix free → Addresses for matrix[0], matrix[1], matrix[2] are GONE!
+    → Those memory chunks can NEVER be freed now → Memory Leak!
+```
 
 ---
 
@@ -278,35 +313,128 @@ str2[0] = 'J';   // ❌ CRASH! Segmentation Fault!
 
 ## 4. Pointer-Based String Traversal
 
-Instead of using an index `i`, professional C programmers traverse strings with pointer arithmetic. It's fast and elegant.
+Instead of using an array index `i`, professional C programmers traverse strings with pointer arithmetic. It's fast and elegant.
 
 ```c
-void printString(const char *str) {
-    while (*str) {        // '\0' has a value of 0 (which is false), so this stops the loop!
-        putchar(*str++);  // 1. Read *str, 2. print it, 3. move the pointer str++
+// Way 1: With Array index (familiar)
+void printV1(const char *str) {
+    int i = 0;
+    while (str[i] != '\0') {
+        printf("%c", str[i]);
+        i++;
+    }
+    printf("\n");
+}
+
+// Way 2: With Pointers (elegant!)
+void printV2(const char *str) {
+    while (*str != '\0') {
+        printf("%c", *str);
+        str++;          // move the pointer to the next character
+    }
+    printf("\n");
+}
+
+// Way 3: Extremely concise!
+void printV3(const char *str) {
+    while (*str) {       // '\0' is mathematically 0, which is false! 
+        putchar(*str++); // *str read, print, then str++ (postfix execution!)
     }
     putchar('\n');
 }
 ```
 
-**How `*str++` works inside the loop:**
+**How `*str++` works inside the loop (Step-by-step):**
 ```text
-    1st loop: str → ┌─────┬─────┬─────┐     Reads 'H', then str moves to next box
-                    │ 'H' │ 'i' │ '\0'│
-    2nd loop: str ──────→  ↑              Reads 'i', then str moves to next box
-    3rd loop: str ─────────────→  ↑       Reads '\0', loop exits automatically!
+    char name[] = "Hi";
+    char *str = name;
+
+    1st:  str → ┌─────┬─────┬─────┐     *str = 'H', print, str++
+                │ 'H' │ 'i' │ '\0'│
+    2nd:  str ──────→  ↑              *str = 'i', print, str++
+    3rd:  str ─────────────→  ↑       *str = '\0', loop exit
 ```
 
-You can even build your own `strlen` algorithm purely subtracting two pointers:
+### Build your own `strlen`
+The Standard library's `strlen` actually uses pointers under the hood. Let's make it:
 ```c
 int myStrLen(const char *str) {
-    const char *start = str;   // Save where we started
+    int count = 0;
+    while (*str != '\0') {
+        count++;
+        str++;
+    }
+    return count;
+}
+
+// Or with pure pointer arithmetic — very clever:
+int myStrLen2(const char *str) {
+    const char *start = str;  // Save where we started
     while (*str) {
         str++;                 // Walk to the end
     }
     return str - start;        // End address - Start address = length count!
 }
 ```
+*Why does `str - start` work?* Remember pointer arithmetic: subtracting two pointers gives the number of elements between them!
+
+### Build your own `strcpy`
+```c
+// Copy characters from source to destination
+void myStrCpy(char *dest, const char *src) {
+    while (*src != '\0') {
+        *dest = *src;   // copy char from src to dest
+        dest++;
+        src++;
+    }
+    *dest = '\0';       // Add the null terminator at the end!
+}
+
+// It can be written in a SINGLE line (advanced):
+void myStrCpy2(char *dest, const char *src) {
+    while ((*dest++ = *src++));
+}
+```
+Wait, let's break down `while ((*dest++ = *src++))` — This is C's most famous one-liner!
+```text
+    src = "Hi"       dest = "???"
+
+    Iteration 1: *dest = *src → Copies 'H' → dest++, src++
+    Iteration 2: *dest = *src → Copies 'i' → dest++, src++
+    Iteration 3: *dest = *src → Copies '\0' → '\0' equals 0 (false) → STOP!
+
+    Result: dest receives "Hi\0" ← A perfect, safe string copy!
+```
+
+### Array of Strings (Array of `char` pointers)
+```c
+const char *days[] = {
+    "Saturday",    // days[0] → "Saturday"
+    "Sunday",      // days[1] → "Sunday"
+    "Monday",      // days[2] → "Monday"
+    "Tuesday",     // days[3] → "Tuesday"
+    "Wednesday",   // days[4] → "Wednesday"
+    "Thursday",    // days[5] → "Thursday"
+    "Friday"       // days[6] → "Friday"
+};
+
+for (int i = 0; i < 7; i++) {
+    printf("Day %d: %s\n", i, days[i]);
+}
+```
+```text
+    days (array of char pointers):
+    ┌──────────┐
+    │ days[0]  │ ──→ "Saturday\0"
+    ├──────────┤
+    │ days[1]  │ ──→ "Sunday\0"
+    ├──────────┤
+    │  ...     │
+    └──────────┘
+    Each element is a char pointer holding the starting address of a string!
+```
+> **Pro Tip:** Always use `const char *str` for strings unless you explicitly need to modify them. It stops bugs immediately!
+
 
 ---
 
